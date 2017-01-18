@@ -1,7 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import {ShallowComponent, Generator, Class, Arrays, Maps} from "robe-react-commons";
-import "./AreaChart.css"
+import "./LineChart.css"
 import Legend from "./Legend";
 
 export default class AreaChart extends ShallowComponent {
@@ -10,14 +9,14 @@ export default class AreaChart extends ShallowComponent {
         width: React.PropTypes.number,
         height: React.PropTypes.number,
         data: React.PropTypes.array,
-        areas: React.PropTypes.array
+        lines: React.PropTypes.array
     };
 
     static defaultProps = {
         width: 500,
         height: 300,
         data: [],
-        areas: []
+        lines: []
     };
 
     constructor(props) {
@@ -26,15 +25,15 @@ export default class AreaChart extends ShallowComponent {
 
     render() {
         return (
-            <div id="area" style={{marginLeft:40}}>
-                <div className="rb-area-chart" style={{width:this.props.width,height:this.props.height}}>
-                    <div className="rb-area-chart-layout">
-                        {this.renderArea(this.props.data, this.props.areas)}
+            <div id="line" style={{marginLeft:40}}>
+                <div className="rb-line-chart" style={{width:this.props.width,height:this.props.height}}>
+                    <div className="rb-line-chart-layout">
+                        {this.renderArea(this.props.data, this.props.lines)}
                     </div>
-                    <div className="rb-area-chart-layout">
+                    <div className="rb-line-chart-layout">
                         {this.__renderYAxis(this.props.data)}
                     </div>
-                    <div className="rb-area-chart-layout">
+                    <div className="rb-line-chart-layout">
                         {this.__renderXAxis(this.props.data)}
                     </div>
                 </div>
@@ -44,13 +43,13 @@ export default class AreaChart extends ShallowComponent {
                 <Legend
                     width={this.props.width}
                     data={this.props.data}
-                    bars={this.props.areas}/>
+                    bars={this.props.lines}/>
             </div>
         )
     }
 
-    renderArea(data, areas) {
-        let areasArr = [];
+    renderArea(data, lines) {
+        let linesArr = [];
         let width = parseInt(Math.round(this.__calculateXAxisWidth() * 2) / 2);
         let height = this.props.height - 1;
 
@@ -65,7 +64,7 @@ export default class AreaChart extends ShallowComponent {
                     }
                     let value = item[key];
 
-                    let properties = Arrays.getValueByKey(areas, "dataKey", key);
+                    let properties = Arrays.getValueByKey(lines, "dataKey", key);
                     properties = properties === undefined ? {} : properties;
 
                     let desc = (properties.name || key) + " : " + value;
@@ -75,32 +74,39 @@ export default class AreaChart extends ShallowComponent {
                         next = data[parseInt(i) + 1][key];
                     }
 
-                    let borderLeft = "none";
-                    let borderRight = "none";
+                    let x1 = 0;
+                    let y1 = 0;
+                    let y2 = 0;
+
                     if (next < value) {
-                        borderLeft = width + "px solid " + (properties.fill || item.fill);
+                        x1 = 0;
+                        y1 = 0;
+                        y2 = this.__calculateBarHeight(data, Math.abs(next - value));
                     }
                     else {
-                        borderRight = width + "px solid " + (properties.fill || item.fill);
+                        x1 = 0;
+                        y1 = this.__calculateBarHeight(data, Math.abs(next - value));
+                        y2 = 0;
                     }
 
-                    let borderTop = this.__calculateBarHeight(data, Math.abs(next - value)) + "px solid transparent";
-
                     itemArr.push(
-                        <div
+                        <svg
                             key={key}
-                            className="rb-area"
-                            style={{borderLeft:borderLeft,borderRight:borderRight,borderTop:borderTop,height:this.__calculateBarHeight(data,next>value?next:value)}}>
-                        </div>);
+                            className="rb-line"
+                            style={{
+                                height:this.__calculateBarHeight(data,next>value?next:value)}}>
+                            <line x1={x1} y1={y1} x2={width} y2={y2}
+                                  style={{stroke:(properties.fill || item.fill),strokeWidth:1}}/>
+                        </svg>);
                 }
             }
-            areasArr.push(
+            linesArr.push(
                 <div key={i}
                      style={{width:width,height:height}}>
                     {itemArr}
                 </div>)
         }
-        return areasArr;
+        return linesArr;
     }
 
 

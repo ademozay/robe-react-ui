@@ -318,6 +318,14 @@ class ComponentList {
             code: require("./samples/chart/AreaChartSample.txt")
         });
 
+        components.chart.push({
+            header: "LineChart",
+            desc: " a bar chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            // json: require("./jsons/charts/BarChart.json"),
+            sample: require("./samples/chart/LineChartSample"),
+            code: require("./samples/chart/LineChartSample.txt")
+        });
+
 
         return components;
     }
