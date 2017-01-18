@@ -11,13 +11,13 @@ export default class Legend extends ShallowComponent {
         className: React.PropTypes.string,
         width: React.PropTypes.number,
         data: React.PropTypes.array,
-        bars: React.PropTypes.array
+        legends: React.PropTypes.array
     };
 
     static defaultProps = {
         width: 500,
         data: [],
-        bars: []
+        legends: []
     };
 
     constructor(props) {
@@ -28,14 +28,14 @@ export default class Legend extends ShallowComponent {
         return (
             <div className={this.props.className} style={{width:this.props.width}}>
                 <ThumbnailGroup>
-                    {this.__renderLenged(this.props.data, this.props.bars)}
+                    {this.__renderLenged(this.props.data, this.props.legends)}
                 </ThumbnailGroup>
             </div>
         )
     }
 
 
-    __renderLenged(data, bars) {
+    __renderLenged(data, legends) {
         let legendArr = [];
         let uniqueList = [];
         for (let i in data) {
@@ -49,7 +49,7 @@ export default class Legend extends ShallowComponent {
                         continue;
                     }
 
-                    let properties = Arrays.getValueByKey(bars, "dataKey", key);
+                    let properties = Arrays.getValueByKey(legends, "dataKey", key);
                     properties = properties === undefined ? {} : properties;
 
                     uniqueList.push(key);

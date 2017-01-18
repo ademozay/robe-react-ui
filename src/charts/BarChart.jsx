@@ -26,7 +26,7 @@ export default class BarChart extends ShallowComponent {
     render() {
         return (
             <div id="bar" style={{marginLeft:40}}>
-                <div className="rb-bar-chart" style={{width:this.props.width,height:this.props.height}}>
+                <div className="rb-bar-chart" style={{width:(this.props.width+2),height:this.props.height}}>
                     <div className="rb-bar-chart-layout">
                         {this.renderBars(this.props.data, this.props.bars)}
                     </div>
@@ -40,7 +40,7 @@ export default class BarChart extends ShallowComponent {
                 <div className="rb-x-axis-layout">
                     {this.__renderXAxisLayout(this.props.data)}
                 </div>
-                <Legend width={this.props.width} data={this.props.data} bars={this.props.bars}/>
+                <Legend width={this.props.width} data={this.props.data} legends={this.props.bars}/>
             </div>
         )
     }
@@ -147,7 +147,7 @@ export default class BarChart extends ShallowComponent {
     }
 
     __calculateXAxisWidth() {
-        return (this.props.width - 1) / this.props.data.length;
+        return parseInt(Math.round(((this.props.width) / this.props.data.length) * 2) / 2);
     }
 
     __calculateBarHeight(data, value) {

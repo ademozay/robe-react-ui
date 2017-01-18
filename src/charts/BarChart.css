@@ -79,8 +79,8 @@
     padding: 0 4px;
     width: 100%;
     transition: all .5s;
-    -webkit-animation: bar-animation 3s ease;
-    animation: bar-animation 3s ease;
+    -webkit-animation: bar-animation 1s ease;
+    animation: bar-animation 1s ease;
 }
 
 @keyframes bar-animation {

@@ -26,7 +26,7 @@ export default class AreaChart extends ShallowComponent {
     render() {
         return (
             <div id="line" style={{marginLeft:40}}>
-                <div className="rb-line-chart" style={{width:this.props.width,height:this.props.height}}>
+                <div className="rb-line-chart" style={{width:(this.props.width+1),height:this.props.height}}>
                     <div className="rb-line-chart-layout">
                         {this.renderArea(this.props.data, this.props.lines)}
                     </div>
@@ -43,7 +43,7 @@ export default class AreaChart extends ShallowComponent {
                 <Legend
                     width={this.props.width}
                     data={this.props.data}
-                    bars={this.props.lines}/>
+                    legends={this.props.lines}/>
             </div>
         )
     }
@@ -170,25 +170,11 @@ export default class AreaChart extends ShallowComponent {
     }
 
     __calculateXAxisWidth() {
-        return (this.props.width - 1) / (this.props.data.length - 1);
+        return parseInt(Math.round(((this.props.width) / (this.props.data.length - 1)) * 2) / 2);
     }
 
     __calculateBarHeight(data, value) {
         let maxYAxis = this.__calculateMaxYAxis(data);
         return ((this.props.height * ((value * 100) / maxYAxis)) / 100);
-    }
-
-    __calculateBarWidth(data) {
-        let count = 0;
-        for (let key in data) {
-            if (data.hasOwnProperty(key)) {
-                if (key === "name" || key === "fill") {
-                    continue;
-                }
-                count++;
-            }
-        }
-        let minWidth = (this.__calculateXAxisWidth() - 1) / count;
-        return minWidth < 40 ? minWidth : 40;
     }
 }
