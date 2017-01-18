@@ -6,7 +6,7 @@ class ComponentList {
     maxValue = InputValidations.maxValue.bind(undefined, 3);
 
     getList():Array {
-        let components = {inputs: [], complex: [], charts: []};
+        let components = {inputs: [], complex: [], charts: [], chart: []};
         /* eslint-disable global-require */
         components.inputs.push({
             header: "TextInput",
@@ -302,6 +302,22 @@ class ComponentList {
             sample: require("./samples/charts/ScatterChartSample"),
             code: require("./samples/charts/ScatterChartSample.txt")
         });
+
+        components.chart.push({
+            header: "BarChart",
+            desc: " a bar chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            // json: require("./jsons/charts/BarChart.json"),
+            sample: require("./samples/chart/BarChartSample"),
+            code: require("./samples/chart/BarChartSample.txt")
+        });
+        components.chart.push({
+            header: "AreaChart",
+            desc: " a bar chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            // json: require("./jsons/charts/BarChart.json"),
+            sample: require("./samples/chart/AreaChartSample"),
+            code: require("./samples/chart/AreaChartSample.txt")
+        });
+
 
         return components;
     }
