@@ -23,17 +23,56 @@
 
 }
 
-@keyframes line-animation {
-    0% {
-        opacity: 0;
-        width: 0;
-    }
+.rb-line-chart-layout:first-child > *:hover {
+    opacity: .9;
+    z-index: 1;
+}
+
+.rb-line-chart-layout:first-child > *:hover:after {
+    content: attr(data-after);
+    position: absolute;
+    background: #fff;
+    min-height: 32px;
+    min-width: 100%;
+    z-index: 1000;
+    top: 0;
+    white-space: pre;
+    padding: 4px;
+    border: 1px solid #dddddd;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.rb-line-chart-layout:first-child > *:hover:before {
+    content: attr(data-before);
+    position: absolute;
+    background: #fff;
+    min-height: 32px;
+    min-width: 100%;
+    z-index: 1000;
+    top: 40%;
+    white-space: pre;
+    padding: 4px;
+    border: 1px solid #dddddd;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .rb-line-chart-layout > * {
     position: relative;
     float: left;
     display: flex;
+}
+
+.rb-line-chart-layout:first-child > * {
+    -webkit-animation: line-animation 1s linear;
+    animation: line-animation 1s linear;
+}
+
+@keyframes line-animation {
+    0% {
+        width: 0;
+    }
 }
 
 .rb-y-axis {
@@ -68,7 +107,6 @@
 
 .rb-line {
     position: absolute;
-    cursor: pointer;
     bottom: 0;
     opacity: .6;
     width: 100%;

@@ -312,7 +312,7 @@ class ComponentList {
         });
         components.chart.push({
             header: "AreaChart",
-            desc: " a bar chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            desc: " a area chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
             // json: require("./jsons/charts/BarChart.json"),
             sample: require("./samples/chart/AreaChartSample"),
             code: require("./samples/chart/AreaChartSample.txt")
@@ -320,10 +320,26 @@ class ComponentList {
 
         components.chart.push({
             header: "LineChart",
-            desc: " a bar chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            desc: " a line chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
             // json: require("./jsons/charts/BarChart.json"),
             sample: require("./samples/chart/LineChartSample"),
             code: require("./samples/chart/LineChartSample.txt")
+        });
+
+        components.chart.push({
+            header: "ScatterChart",
+            desc: " a scatter chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            // json: require("./jsons/charts/BarChart.json"),
+            sample: require("./samples/chart/ScatterChartSample"),
+            code: require("./samples/chart/ScatterChartSample.txt")
+        });
+
+        components.chart.push({
+            header: "PieChart",
+            desc: " a pie chart or bar graph is a chart or graph that presents grouped data with rectangle|rectangular bars with lengths proportional to the values that they represent.",
+            // json: require("./jsons/charts/BarChart.json"),
+            sample: require("./samples/chart/PieChartSample"),
+            code: require("./samples/chart/PieChartSample.txt")
         });
 
 

@@ -18,12 +18,62 @@
 
 .rb-area-chart-layout:first-child {
     z-index: 1;
+    overflow: hidden;
+    -webkit-animation: area-animation 1s linear;
+    animation: area-animation 1s linear;
+}
+
+.rb-area-chart-layout:first-child > *:hover {
+    opacity: .9;
+    z-index: 1;
+}
+
+.rb-area-chart-layout:first-child > *:hover:after {
+    content: attr(data-after);
+    position: absolute;
+    background-color: #fff;
+    min-height: 32px;
+    min-width: 100%;
+    z-index: 1000;
+    top: 0%;
+    white-space: pre;
+    padding: 4px;
+    border: 1px solid #dddddd;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.rb-area-chart-layout:first-child > *:hover:before {
+    content: attr(data-before);
+    position: absolute;
+    background-color: #fff;
+    min-height: 32px;
+    min-width: 100%;
+    z-index: 1000;
+    top: 40%;
+    white-space: pre;
+    padding: 4px;
+    border: 1px solid #dddddd;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .rb-area-chart-layout > * {
     position: relative;
     float: left;
     display: flex;
+
+}
+
+.rb-area-chart-layout:first-child > * {
+    -webkit-animation: area-animation linear;
+    animation: area-animation linear;
+}
+
+@keyframes area-animation {
+    0% {
+        width: 0;
+    }
 }
 
 .rb-y-axis {
@@ -58,18 +108,12 @@
 
 .rb-area {
     position: absolute;
-    cursor: pointer;
     bottom: 0;
     opacity: .6;
     width: 100%;
-    -webkit-animation: area-animation 1s ease;
-    animation: area-animation 1s ease;
 
 }
 
-@keyframes area-animation {
-    0% {
-        height: 0;
-        border-top: 0 solid transparent;
-    }
+.rb-area:hover:after {
+
 }

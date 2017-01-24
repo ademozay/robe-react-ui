@@ -17,11 +17,11 @@ let lines = [
     {dataKey: "amt", name: "a-m-t", fill: "green"}
 ];
 
-export default class BarChartSample extends ShallowComponent {
+export default class LineChartSample extends ShallowComponent {
 
     render():Object {
         return (
-            <div style={{minHeight:500}}>
+            <div>
                 <div className="form-group">
                     <LineChart data={data} width={500} height={300} lines={lines}/>
                 </div>

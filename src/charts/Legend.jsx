@@ -11,13 +11,15 @@ export default class Legend extends ShallowComponent {
         className: React.PropTypes.string,
         width: React.PropTypes.number,
         data: React.PropTypes.array,
-        legends: React.PropTypes.array
+        legends: React.PropTypes.array,
+        chart: React.PropTypes.string,
     };
 
     static defaultProps = {
         width: 500,
         data: [],
-        legends: []
+        legends: [],
+        chart: "bar"
     };
 
     constructor(props) {
@@ -25,10 +27,19 @@ export default class Legend extends ShallowComponent {
     }
 
     render() {
+        let legend;
+        switch (this.props.chart) {
+            case "scatter":
+                legend = this.__renderScatter(this.props.data, this.props.legends);
+                break;
+            default:
+                legend = this.__renderLenged(this.props.data, this.props.legends);
+                break;
+        }
         return (
             <div className={this.props.className} style={{width:this.props.width}}>
                 <ThumbnailGroup>
-                    {this.__renderLenged(this.props.data, this.props.legends)}
+                    {legend}
                 </ThumbnailGroup>
             </div>
         )
@@ -42,7 +53,7 @@ export default class Legend extends ShallowComponent {
             let item = data[i];
             for (let key in item) {
                 if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill") {
+                    if (key === "name" || key === "fill" || key === "unit") {
                         continue;
                     }
                     if (Arrays.indexOf(uniqueList, key) !== -1) {
@@ -61,6 +72,21 @@ export default class Legend extends ShallowComponent {
                         </ThumbnailItem>)
                 }
             }
+        }
+        return legendArr;
+    }
+
+    __renderScatter(data, legends) {
+        let legendArr = [];
+        for (let i in data) {
+            let item = data[i];
+
+            let color = item.fill || "#00b0e8";
+            legendArr.push(
+                <ThumbnailItem key={i} className="legend-item">
+                    &nbsp; {item.name }
+                    <div style={{background:color,width:18,height:18,float:"left",opacity:0.6}}></div>
+                </ThumbnailItem>)
         }
         return legendArr;
     }
