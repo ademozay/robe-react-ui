@@ -27,17 +27,17 @@ export default class AreaChart extends ShallowComponent {
         return (
             <div id="line" style={{marginLeft:40}}>
                 <div className="rb-line-chart" style={{width:this.props.width,height:this.props.height}}>
-                    <div className="rb-line-chart-layout">
+                    <svg className="rb-line-chart-svg">
                         {this.renderLines(this.props.data, this.props.lines)}
-                    </div>
-                    <div className="rb-line-chart-layout">
+                    </svg>
+                    <div className="rb-line-chart-axis">
                         {this.__renderYAxis()}
                     </div>
-                    <div className="rb-line-chart-layout">
+                    <div className="rb-line-chart-axis">
                         {this.__renderXAxis()}
                     </div>
                 </div>
-                <div className="rb-x-axis-layout">
+                <div className="rb-line-chart-axis">
                     {this.__renderXAxisLayout()}
                 </div>
                 <Legend
@@ -50,7 +50,8 @@ export default class AreaChart extends ShallowComponent {
 
     renderLines(data, lines) {
         let linesArr = [];
-        let width = this.__xAxisWidth();
+        let xAxisWidth = this.__xAxisWidth();
+        let sumXAxisWidth = 0;
 
         for (let i = 0; i < data.length - 1; i++) {
             let item = data[i];
@@ -58,59 +59,68 @@ export default class AreaChart extends ShallowComponent {
             let nexItem;
             let tooltipNext;
             let tooltip = item.name + "\n";
-            let color = item.fill || "black";
+
             if (data[i + 1]) {
                 nexItem = data[i + 1];
                 tooltipNext = nexItem.name + "\n"
             }
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill" || key === "unit") {
-                        continue;
-                    }
-                    let value = item[key];
 
-                    let properties = Arrays.getValueByKey(lines, "dataKey", key);
-                    properties = properties === undefined ? {} : properties;
+            let fields = this.__getFields(item);
 
-                    let nexValue = value;
-                    if (nexItem) {
-                        nexValue = nexItem[key];
-                    }
-                    tooltip += (properties.name || key) + " : " + value + " " + (item.unit || "") + "\n";
-                    tooltipNext += (properties.name || key) + " : " + nexValue + " " + (nexItem.unit || "") + "\n";
+            for (let j in fields) {
 
-                    value = this.__lineHeight(value);
-                    nexValue = this.__lineHeight(nexValue);
-                    let height = Math.max(nexValue, value);
+                let key = fields[j].key;
+                let value = fields[j].value;
 
-                    let y1 = nexValue > value ? Math.abs(nexValue - value) : 0;
-                    let y2 = nexValue > value ? 0 : Math.abs(nexValue - value);
+                let properties = Arrays.getValueByKey(lines, "dataKey", key);
+                properties = properties === undefined ? {} : properties;
 
-                    itemArr.push(
-                        <svg
-                            key={key}
-                            className="rb-line"
-                            style={{width:width,height:height}}>
-                            <line x1={0} y1={y1} x2={width} y2={y2}
-                                  style={{stroke:(properties.fill || item.fill),strokeWidth:1}}/>
-                        </svg>);
+                let nexValue = value;
+                if (nexItem) {
+                    nexValue = nexItem[key];
                 }
+                tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
+                tooltipNext += (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
+
+                let pointY = this.__pointY(value);
+                let nextPointY = this.__pointY(nexValue);
+
+                let x1 = sumXAxisWidth;
+                let y1 = pointY;
+
+                let x2 = sumXAxisWidth + xAxisWidth;
+                let y2 = nextPointY;
+
+                itemArr.push(
+                    <line
+                        key={key}
+                        x1={x1}
+                        y1={y1}
+                        x2={x1}
+                        y2={y1}
+                        style={{stroke:(properties.fill || item.fill),strokeWidth:1}}>
+                        <animate
+                            attributeName="x2"
+                            to={x2}
+                            dur={(1 / (data.length - 1)) + "s"}
+                            begin={ (i / (data.length - 1)) + "s"}
+                            fill="freeze"/>
+                        <animate
+                            attributeName="y2"
+                            to={y2}
+                            dur={(1 / (data.length - 1)) + "s"}
+                            begin={ (i / (data.length - 1)) + "s"}
+                            fill="freeze"/>
+                    </line>
+                );
             }
-            let style = {
-                animationDelay: (i / (data.length - 1)) + "s",
-                animationDuration: (1 / (data.length - 1)) + "s",
-                width: width,
-                height: this.props.height,
-                color: color
-            };
+
+            sumXAxisWidth += xAxisWidth;
+
             linesArr.push(
-                <div key={i}
-                     data-before={tooltipNext}
-                     data-after={tooltip}
-                     style={style}>
+                <g key={i}>
                     {itemArr}
-                </div>)
+                </g>)
         }
         return linesArr;
     }
@@ -123,7 +133,7 @@ export default class AreaChart extends ShallowComponent {
             axisArr.push(
                 <div key={i}
                      id={parseInt((maxYAxis/4)*(4-i))}
-                     className="rb-y-axis"
+                     className="rb-line-y-axis"
                      style={{height:(this.props.height/4)}}>
                 </div>);
         }
@@ -137,7 +147,7 @@ export default class AreaChart extends ShallowComponent {
         for (let i = 0; i < data.length - 1; i++) {
             axisArr.push(
                 <div key={i}
-                     className="rb-x-axis"
+                     className="rb-line-x-axis"
                      style={{width : maxYAxis}}>
                 </div>);
         }
@@ -162,15 +172,10 @@ export default class AreaChart extends ShallowComponent {
         let data = this.props.data;
         let maxYAxis = 0;
         for (let i in data) {
-            let item = data[i];
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill" || key === "unit") {
-                        continue;
-                    }
-                    if (item[key] > maxYAxis)
-                        maxYAxis = item[key];
-                }
+            let fields = this.__getFields(data[i]);
+            for (let j in fields) {
+                if (fields[j].value > maxYAxis)
+                    maxYAxis = fields[j].value;
             }
         }
         let a = maxYAxis > 1000 ? 1000 : maxYAxis > 100 ? 100 : maxYAxis > 50 ? 50 : maxYAxis > 10 ? 10 : 1;
@@ -182,8 +187,24 @@ export default class AreaChart extends ShallowComponent {
         return (this.props.width - 1) / (this.props.data.length - 1);
     }
 
-    __lineHeight(value) {
+    __pointY(value) {
         let maxYAxis = this.__maxYAxis();
         return ((this.props.height * ((value * 100) / maxYAxis)) / 100);
+    }
+
+    __getFields(data) {
+        let arr = [];
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (key === "name" || key === "fill" || key === "unit") {
+                    continue;
+                }
+                arr.push({
+                    value: data[key],
+                    key: key
+                });
+            }
+        }
+        return arr;
     }
 }

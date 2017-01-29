@@ -13,119 +13,151 @@ export default class PieChart extends ShallowComponent {
 
     static defaultProps = {
         size: 400,
-        data: [],
-
+        data: []
     };
 
     constructor(props) {
-        super(props)
+        super(props);
+        this.state = {
+            data: this.props.data
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({data: nextProps.data})
     }
 
     render() {
+        let data = this.state.data;
+        let childCountTree = this.__childCountTree(data);
+
         return (
-            <div id="pie" style={{margin:40}}>
-                <div className="rb-pie-chart" style={{width:this.props.size,height:this.props.size}}>
-                    <svg className="rb-pie-chart-layout">
-                        {this.renderScatters(this.props.data)}
+            <div id="pie">
+                <div className="rb-pie-chart"
+                     viewBox={"0 0 "+this.props.size+" "+this.props.size}
+                     style={{width:this.props.size,height:this.props.size}}>
+                    <svg className="rb-pie-chart-svg">
+                        {this.__renderPies(data, 360, 0, childCountTree, childCountTree - 1)}
                     </svg>
                 </div>
-                <br/>
-                <Legend
-                    width={this.props.size}
-                    data={this.props.data}
-                    chart="pie"
-                    legends={this.props.data}/>
             </div>
         )
     }
 
-    renderScatters(data) {
+    __renderPies(data, percentage, rotation, childCountTree, index) {
         let piesArr = [];
-        let sectors = this.calculateSectors(data);
+        let sumValues = this.__sumValues(data);
+        let mRotation = rotation;
 
-        sectors.map(function (sector) {
-            piesArr.push(
-                <path
-                    className="rb-pie"
-                    transform={'rotate(' + sector.R + ', ' + sector.O + ', ' + sector.O + ')'}
-                    d={'M ' + sector.O + ' ' + sector.O + ' L ' + sector.Lx +' '+ sector.Ly + ' A ' + sector.L + ' ' + sector.L + ' 1 0 1 ' + sector.X + '  ' + sector.Y + ' z'}
-                    stroke={sector.color}
-                    fill={sector.color}/>
-            );
-        });
+        let c = 2 * childCountTree + 1;
+        let d = c - index;
+        let mRadius = (((this.props.size - 1) / 2) / c) * d;
+
+        for (let i = 0; i < data.length; i++) {
+            let item = data[i];
+            let mPercentage = (percentage * item.value) / sumValues;
+            if (item.children) {
+                let childPiesArr = this.__renderPies(item.children, mPercentage, mRotation, childCountTree, index - 1);
+                piesArr.push.apply(piesArr, childPiesArr);
+            }
+            mRotation += mPercentage;
+        }
+        piesArr.push.apply(piesArr, this.__createPath(data, mRadius, percentage, rotation));
 
         return piesArr;
     }
 
+    __createPath(data, radius, percentage, rotaion) {
+        let sectors = [];
 
-    __maxAxis(data, valueKey) {
+        let mRadius = radius;
+        let origin = this.props.size / 2;
+        let mRotation = rotaion;
+
+        let max = this.__sumValues(data);
+        if (data.length <= 1) {
+            max += 0.1;
+        }
+
+        data.map(function (item, key) {
+            let value = item.value;
+            let mPercentage = (percentage * value) / max;
+
+            let aCalc = ( mPercentage > 180 ) ? 360 - mPercentage : mPercentage;
+            let aRad = aCalc * Math.PI / 180;
+
+            let z = Math.sqrt(2 * mRadius * mRadius - ( 2 * mRadius * mRadius * Math.cos(aRad) ));
+            let x = aCalc <= 90 ? mRadius * Math.sin(aRad) : mRadius * Math.sin((180 - aCalc) * Math.PI / 180);
+            let y = Math.sqrt(z * z - x * x);
+
+            let Y = (origin - mRadius) + y;
+            let X = mPercentage <= 180 ? origin + x : origin - x;
+            let arcSweep = mPercentage <= 180 ? 0 : 1;
+
+            let V = origin - mRadius;
+            let point = this.__calculute(
+                {X: origin, Y: V},
+                {X: X, Y: Y},
+                {X: origin, Y: origin}, arcSweep);
+
+            sectors.push(
+                <path
+                    key={key+item.label+X}
+                    id={key+item.label+X}
+                    className="rb-pie"
+                    transform={'rotate(' + mRotation + ', ' + origin + ', ' + origin + ')'}
+                    d={'M ' + origin + ' ' + origin + ' V ' + V + ' A ' + mRadius + ' ' + mRadius + ' 1 ' + arcSweep + ' 1 ' + X + '  ' + Y + " z" }
+                    fill={item.fill}
+                    onClick={this.__onClick.bind(undefined,item)}>
+                </path>);
+            mRotation = mRotation + mPercentage;
+        }.bind(this));
+
+        return sectors
+    }
+
+    __onClick(data) {
+        let arr = [];
+        arr.push(data);
+        this.setState({data: arr})
+    }
+
+    __childCountTree(data) {
+        let count = 1;
+        let a = 0;
+        for (let i = 0; i < data.length; i++) {
+            let item = data[i];
+            if (item.children) {
+                let b = this.__childCountTree(item.children);
+                a = Math.max(a, b);
+            }
+        }
+        return count + a;
+    }
+
+
+    __sumValues(data) {
         let max = 0;
         data.map(function (item, key) {
-            let value = item[valueKey];
+            let value = item.value;
             max += value;
         });
         return max;
     }
 
-    calculateSectors(pies) {
-        let sectors = [];
+    text(id, text) {
+        var useTag = '<text xlink:href="#' + id + '">' + text + '</text>';
 
-        let aRad = 0; // Angle in Rad
+        return <g dangerouslySetInnerHTML={{__html: useTag }}/>;
+    }
 
-        let z = 0; // Size z
-        let x = 0; // Side x
-        let y = 0; // Side y
-
-        let X = 0; // SVG X coordinate
-        let Y = 0; // SVG Y coordinate
-
-        let radius = 100;
-        let origin = this.props.size / 2;
-
-        let rotation = 0;
-        let max = this.__maxAxis(pies, "value");
-
-        pies.map(function (item, key) {
-            let value = item.value;
-            let percentage = (360 * value) / max;
-            let aCalc = ( percentage > 180 ) ? 360 - percentage : percentage;
-
-            aRad = aCalc * Math.PI / 180;
-
-            z = Math.sqrt(2 * radius * radius - ( 2 * radius * radius * Math.cos(aRad) ));
-
-            if (aCalc <= 90) {
-                x = radius * Math.sin(aRad);
-            }
-            else {
-                x = radius * Math.sin((180 - aCalc) * Math.PI / 180);
-            }
-
-            y = Math.sqrt(z * z - x * x);
-            Y = (origin - radius) + y;
-
-            if (percentage <= 180) {
-                X = origin + x;
-            }
-            else {
-                X = origin - x;
-            }
-            sectors.push({
-                label: item.label,
-                color: item.fill,
-                L: radius,
-                O: origin,
-                X: X,
-                Y: Y,
-                Lx: origin,
-                Ly: origin - radius,
-                R: rotation
-            });
-
-            rotation = rotation + percentage;
-        });
-
-
-        return sectors
+    __calculute(pointA, pointB, pointO, angle) {
+        let widthMin = Math.min(pointA.X, pointB.X, pointO.X);
+        let widthMax = Math.max(pointA.X, pointB.X, pointO.X);
+        let heightMin = Math.min(pointA.Y, pointB.Y, pointO.Y);
+        let heightMax = Math.max(pointA.Y, pointB.Y, pointO.Y);
+        let a = (widthMax - widthMin) / 2 + widthMin;
+        let b = (heightMax - heightMin) / 2 + heightMin;
+        return {X: angle === 1 ? pointO.X + (pointO.X - a) : a, Y: angle === 1 ? pointO.Y + (pointO.Y - b) : b}
     }
 }

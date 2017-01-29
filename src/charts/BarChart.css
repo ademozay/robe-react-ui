@@ -7,23 +7,40 @@
     width: 100%;
 }
 
-.rb-bar-chart-layout {
+.rb-bar-chart-svg {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 0;
-}
-
-.rb-bar-chart-layout:first-child {
     z-index: 1;
+
+    -webkit-transform: rotateX(-180deg);
+    -moz-transform: rotateX(-180deg);
+    -o-transform: rotateX(-180deg);
+    -ms-transform: rotateX(-180deg);
+    transform: rotateX(-180deg);
 }
 
-.rb-bar-chart-layout:first-child > *:hover {
-    opacity: .9;
-    z-index: 1;
+.rb-bar-chart-svg g {
+    position: relative;
+    float: left;
+    display: flex;
+    height: 100%;
 }
 
-.rb-bar-chart-layout:first-child > *:hover:after {
+.rb-bar-chart-svg g > * {
+    opacity: .6;
+    transition: all .5s;
+    -webkit-animation: bar-animation 1s ease;
+    animation: bar-animation 1s ease;
+}
+
+@keyframes bar-animation {
+    0% {
+        height: 0;
+    }
+}
+
+.rb-bar-chart-svg g:hover:after {
     content: attr(data);
     position: absolute;
     background: #fff;
@@ -38,18 +55,25 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.rb-bar-chart-layout > * {
+.rb-bar-chart-axis {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.rb-bar-chart-axis > * {
     position: relative;
     float: left;
     display: flex;
 }
 
-.rb-y-axis {
+.rb-bar-y-axis {
     width: 100%;
     border-top: 1px dotted #dddddd;
 }
 
-.rb-y-axis:before {
+.rb-bar-y-axis:before {
     content: attr(id);
     top: -8px;
     left: -46px;
@@ -59,37 +83,7 @@
     display: block;
 }
 
-.rb-x-axis {
+.rb-bar-x-axis {
     height: 100%;
     border-right: 1px solid #dddddd;
-}
-
-#bar .rb-x-axis-layout {
-    width: 100%;
-    min-height: 24px;
-}
-
-#bar .rb-x-axis-layout > * {
-    float: left;
-    text-align: center;
-}
-
-.rb-bar {
-    position: relative;
-}
-
-.bar {
-    position: absolute;
-    bottom: 0;
-    height: 0;
-    opacity: .6;
-    transition: all .5s;
-    -webkit-animation: bar-animation 1s ease;
-    animation: bar-animation 1s ease;
-}
-
-@keyframes bar-animation {
-    0% {
-        height: 0;
-    }
 }

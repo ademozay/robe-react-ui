@@ -28,17 +28,17 @@ export default class BarChart extends ShallowComponent {
             <div id="bar" style={{marginLeft:40}}>
                 <div className="rb-bar-chart"
                      style={{width:this.props.width,height:this.props.height}}>
-                    <div className="rb-bar-chart-layout">
+                    <svg className="rb-bar-chart-svg">
                         {this.renderBars(this.props.data, this.props.bars)}
-                    </div>
-                    <div className="rb-bar-chart-layout">
+                    </svg>
+                    <div className="rb-bar-chart-axis">
                         {this.__renderYAxis()}
                     </div>
-                    <div className="rb-bar-chart-layout">
+                    <div className="rb-bar-chart-axis">
                         {this.__renderXAxis()}
                     </div>
                 </div>
-                <div className="rb-x-axis-layout">
+                <div className="rb-bar-chart-axis">
                     {this.__renderXAxisLayout()}
                 </div>
                 <Legend
@@ -51,48 +51,46 @@ export default class BarChart extends ShallowComponent {
 
     renderBars(data, bars) {
         let barsArr = [];
-        let width = this.__xAxisWidth();
+        let xAxisWidth = this.__xAxisWidth();
+        let sumXAxisWidth = 0;
 
         for (let i in data) {
             let item = data[i];
             let itemArr = [];
             let tooltip = item.name + "\n";
-            let color = item.fill || "black";
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill" || key === "unit") {
-                        continue;
-                    }
-                    let value = item[key];
-                    let properties = Arrays.getValueByKey(bars, "dataKey", key);
-                    properties = properties === undefined ? {} : properties;
 
-                    tooltip += (properties.name || key) + " : " + value + " " + (item.unit || "") + "\n";
-                    let fill = properties.fill || item.fill;
+            let barWidth = this.__barWidth(item);
+            let fields = this.__getFields(item);
+            let pointX = sumXAxisWidth + ((xAxisWidth - (barWidth * fields.length)) / 2);
+            sumXAxisWidth += xAxisWidth;
 
-                    let height = this.__barHeight(value);
-                    let minWidth = this.__barWidth(item);
+            for (let j in fields) {
+                let key = fields[j].key;
+                let value = fields[j].value;
 
-                    itemArr.push(
-                        <div
-                            key={key}
-                            className="rb-bar center-block"
-                            style={{width:minWidth}}>
-                            <svg
-                                className="bar"
-                                style={{width:minWidth,height:height}}>
-                                <rect width={minWidth} height={height} fill={fill}/>
-                            </svg>
-                        </div>);
+                let properties = Arrays.getValueByKey(bars, "dataKey", key);
+                properties = properties === undefined ? {} : properties;
 
-                }
+                tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
+                let fill = properties.fill || item.fill;
+
+                let barHeight = this.__barHeight(value);
+
+                itemArr.push(
+                    <rect
+                        key={key}
+                        x={pointX}
+                        y={0}
+                        width={barWidth}
+                        height={barHeight}
+                        fill={fill}/>);
+
+                pointX += barWidth;
             }
             barsArr.push(
-                <div key={i}
-                     data={tooltip}
-                     style={{width:width,height:this.props.height,color:color}}>
+                <g key={i}>
                     {itemArr}
-                </div>)
+                </g>)
         }
         return barsArr;
     }
@@ -105,7 +103,7 @@ export default class BarChart extends ShallowComponent {
             axisArr.push(
                 <div key={i}
                      id={parseInt((maxYAxis/4)*(4-i))}
-                     className="rb-y-axis"
+                     className="rb-bar-y-axis"
                      style={{height:(this.props.height/4)}}>
                 </div>);
         }
@@ -119,7 +117,7 @@ export default class BarChart extends ShallowComponent {
         for (let i = 0; i < data.length; i++) {
             axisArr.push(
                 <div key={i}
-                     className="rb-x-axis"
+                     className="rb-bar-x-axis"
                      style={{width : maxYAxis}}>
                 </div>);
         }
@@ -144,15 +142,10 @@ export default class BarChart extends ShallowComponent {
         let data = this.props.data;
         let maxYAxis = 0;
         for (let i in data) {
-            let item = data[i];
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill") {
-                        continue;
-                    }
-                    if (item[key] > maxYAxis)
-                        maxYAxis = item[key];
-                }
+            let fields = this.__getFields(data[i]);
+            for (let j in fields) {
+                if (fields[j].value > maxYAxis)
+                    maxYAxis = fields[j].value;
             }
         }
         let a = maxYAxis > 1000 ? 1000 : maxYAxis > 100 ? 100 : maxYAxis > 50 ? 50 : maxYAxis > 10 ? 10 : 1;
@@ -170,16 +163,24 @@ export default class BarChart extends ShallowComponent {
     }
 
     __barWidth(data) {
-        let count = 0;
+        let fields = this.__getFields(data);
+        let minWidth = this.__xAxisWidth() / fields.length;
+        return minWidth < 30 ? minWidth : 30;
+    }
+
+    __getFields(data) {
+        let arr = [];
         for (let key in data) {
             if (data.hasOwnProperty(key)) {
                 if (key === "name" || key === "fill" || key === "unit") {
                     continue;
                 }
-                count++;
+                arr.push({
+                    value: data[key],
+                    key: key
+                });
             }
         }
-        let minWidth = this.__xAxisWidth() / count;
-        return minWidth < 30 ? minWidth : 30;
+        return arr;
     }
 }

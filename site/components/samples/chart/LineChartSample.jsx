@@ -12,7 +12,7 @@ let data = [
     {name: "Page G", uv: 3490, pv: 4300, amt: 2100, fill: "#ffc658"}
 ];
 let lines = [
-    {dataKey: "uv", name: "u-v", fill: "red"},
+    {dataKey: "uv", name: "u-v", fill: "red", unit: "cd"},
     {dataKey: "pv", name: "p-v", fill: "blue"},
     {dataKey: "amt", name: "a-m-t", fill: "green"}
 ];

@@ -27,17 +27,17 @@ export default class AreaChart extends ShallowComponent {
         return (
             <div id="area" style={{marginLeft:40}}>
                 <div className="rb-area-chart" style={{width:this.props.width,height:this.props.height}}>
-                    <div className="rb-area-chart-layout">
+                    <svg className="rb-area-chart-svg">
                         {this.renderAreas(this.props.data, this.props.areas)}
-                    </div>
-                    <div className="rb-area-chart-layout">
+                    </svg>
+                    <div className="rb-area-chart-axis">
                         {this.__renderYAxis()}
                     </div>
-                    <div className="rb-area-chart-layout">
+                    <div className="rb-area-chart-axis">
                         {this.__renderXAxis()}
                     </div>
                 </div>
-                <div className="rb-x-axis-layout">
+                <div className="rb-area-chart-axis">
                     {this.__renderXAxisLayout()}
                 </div>
                 <Legend
@@ -50,7 +50,8 @@ export default class AreaChart extends ShallowComponent {
 
     renderAreas(data, areas) {
         let areasArr = [];
-        let width = this.__xAxisWidth();
+        let xAxisWidth = this.__xAxisWidth();
+        let sumXAxisWidth = 0;
 
         for (let i = 0; i < data.length - 1; i++) {
             let item = data[i];
@@ -58,56 +59,56 @@ export default class AreaChart extends ShallowComponent {
             let nexItem;
             let tooltipNext;
             let tooltip = item.name + "\n";
-            let color = item.fill || "black";
+
             if (data[i + 1]) {
                 nexItem = data[i + 1];
                 tooltipNext = nexItem.name + "\n"
             }
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill" || key === "unit") {
-                        continue;
-                    }
-                    let value = item[key];
 
-                    let properties = Arrays.getValueByKey(areas, "dataKey", key);
-                    properties = properties === undefined ? {} : properties;
+            let fields = this.__getFields(item);
 
-                    let nexValue = value;
-                    if (nexItem) {
-                        nexValue = nexItem[key];
-                    }
-                    tooltip += (properties.name || key) + " : " + value + " " + (item.unit || "") + "\n";
-                    tooltipNext += (properties.name || key) + " : " + nexValue + " " + (nexItem.unit || "") + "\n";
+            for (let j in fields) {
 
-                    value = this.__areaHeight(value);
-                    nexValue = this.__areaHeight(nexValue);
-                    let height = Math.max(nexValue, value);
+                let key = fields[j].key;
+                let value = fields[j].value;
 
-                    let points = "0 " + height + "," + width + " " + height + "," + width + " " + (height - nexValue) + "," + "0 " + (height - value);
-                    itemArr.push(
-                        <svg
-                            key={key}
-                            className="rb-area"
-                            style={{width:width,height:height}}>
-                            <polygon fill={properties.fill || item.fill} points={points}/>
-                        </svg>);
+                let properties = Arrays.getValueByKey(areas, "dataKey", key);
+                properties = properties === undefined ? {} : properties;
+
+                let nexValue = value;
+                if (nexItem) {
+                    nexValue = nexItem[key];
                 }
+                tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
+                tooltipNext += (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
+
+                let pointY = this.__pointY(value);
+                let nextPointY = this.__pointY(nexValue);
+
+                let points = sumXAxisWidth + " " + "0," + (sumXAxisWidth + xAxisWidth) + " " + "0," + (sumXAxisWidth + xAxisWidth) + " " + nextPointY + "," + sumXAxisWidth + " " + pointY;
+                let startPoints = sumXAxisWidth + " " + "0," + sumXAxisWidth + " " + "0," + sumXAxisWidth + " " + pointY + "," + sumXAxisWidth + " " + pointY;
+
+                itemArr.push(
+                    <polygon
+                        key={key}
+                        fill={properties.fill || item.fill}
+                        points={startPoints}>
+                        <animate
+                            attributeName="points"
+                            to={points}
+                            dur={(1 / (data.length - 1)) + "s"}
+                            begin={ (i / (data.length - 1)) + "s"}
+                            fill="freeze"/>
+                    </polygon>
+                );
             }
-            let style = {
-                animationDelay: (i / (data.length - 1)) + "s",
-                animationDuration: (1 / (data.length - 1)) + "s",
-                width: width,
-                height: this.props.height,
-                color: color
-            };
+
+            sumXAxisWidth += xAxisWidth;
+
             areasArr.push(
-                <div key={i}
-                     data-before={tooltipNext}
-                     data-after={tooltip}
-                     style={style}>
+                <g key={i}>
                     {itemArr}
-                </div>)
+                </g>)
         }
         return areasArr;
     }
@@ -120,7 +121,7 @@ export default class AreaChart extends ShallowComponent {
             axisArr.push(
                 <div key={i}
                      id={parseInt((maxYAxis/4)*(4-i))}
-                     className="rb-y-axis"
+                     className="rb-area-y-axis"
                      style={{height:(this.props.height/4)}}>
                 </div>);
         }
@@ -134,7 +135,7 @@ export default class AreaChart extends ShallowComponent {
         for (let i = 0; i < data.length - 1; i++) {
             axisArr.push(
                 <div key={i}
-                     className="rb-x-axis"
+                     className="rb-area-x-axis"
                      style={{width : maxYAxis}}>
                 </div>);
         }
@@ -159,15 +160,10 @@ export default class AreaChart extends ShallowComponent {
         let data = this.props.data;
         let maxYAxis = 0;
         for (let i in data) {
-            let item = data[i];
-            for (let key in item) {
-                if (item.hasOwnProperty(key)) {
-                    if (key === "name" || key === "fill" || key === "unit") {
-                        continue;
-                    }
-                    if (item[key] > maxYAxis)
-                        maxYAxis = item[key];
-                }
+            let fields = this.__getFields(data[i]);
+            for (let j in fields) {
+                if (fields[j].value > maxYAxis)
+                    maxYAxis = fields[j].value;
             }
         }
         let a = maxYAxis > 1000 ? 1000 : maxYAxis > 100 ? 100 : maxYAxis > 50 ? 50 : maxYAxis > 10 ? 10 : 1;
@@ -179,8 +175,25 @@ export default class AreaChart extends ShallowComponent {
         return (this.props.width - 1) / (this.props.data.length - 1);
     }
 
-    __areaHeight(value) {
+    __pointY(value) {
         let maxYAxis = this.__maxYAxis();
         return ((this.props.height * ((value * 100) / maxYAxis)) / 100);
+    }
+
+
+    __getFields(data) {
+        let arr = [];
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (key === "name" || key === "fill" || key === "unit") {
+                    continue;
+                }
+                arr.push({
+                    value: data[key],
+                    key: key
+                });
+            }
+        }
+        return arr;
     }
 }

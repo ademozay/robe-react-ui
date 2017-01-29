@@ -5,30 +5,33 @@
     width: 100%;
 }
 
-.rb-pie-chart-layout {
+.rb-pie-chart-svg {
     position: absolute;
     width: 100%;
     height: 100%;
     display: block;
     overflow: hidden;
     z-index: 0;
-    background-color: #eee;
+    background-color: #fafafa;
+    border-top: 1px dotted #dddddd;
+    border-left: 1px dotted #dddddd;
+
 }
 
-.rb-pie-chart-layout > * {
+
+.rb-pie-chart-svg > * {
     position: relative;
     display: flex;
-}
-
-.rb-pie-chart-layout:hover > * {
-    opacity: 0.6;
+    stroke: white;
+    stroke-width: 2;
 }
 
 .rb-pie {
+    position: relative;
     opacity: 1;
-    transition: all .3s ease-in-out;
 }
 
 .rb-pie:hover {
+    position: absolute;
     opacity: 1;
 }

@@ -27,13 +27,13 @@ export default class ScatterChart extends ShallowComponent {
         return (
             <div id="scatter" style={{marginLeft:40}}>
                 <div className="rb-scatter-chart" style={{width:this.props.width,height:this.props.height}}>
-                    <svg className="rb-scatter-chart-layout">
+                    <svg className="rb-scatter-chart-svg">
                         {this.renderScatters(this.props.data, this.props.scatters)}
                     </svg>
-                    <div className="rb-scatter-chart-layout">
+                    <div className="rb-scatter-chart-axis">
                         {this.__renderYAxis()}
                     </div>
-                    <div className="rb-scatter-chart-layout">
+                    <div className="rb-scatter-chart-axis">
                         {this.__renderXAxis()}
                     </div>
                 </div>
@@ -54,38 +54,35 @@ export default class ScatterChart extends ShallowComponent {
             let item = data[i];
             for (let j in item.data) {
                 let child = item.data[j];
-                let cx = this.__scatterWidth(child.x);
-                let cy = this.__scatterHeight(child.y);
+                let cx = this.__pointX(child.x);
+                let cy = this.__pointY(child.y);
                 let fill = item.fill;
                 let tooltip = item.name + "\n";
-                for (let key in child) {
-                    if (child.hasOwnProperty(key)) {
-                        if (key !== "x" && key !== "y") {
-                            continue;
-                        }
-                        let properties = Arrays.getValueByKey(scatters, "dataKey", key);
-                        properties = properties === undefined ? {} : properties;
-                        tooltip += (properties.name || key) + " : " + child[key] + " " + (properties.unit || "") + "\n";
-                    }
+
+                let fields = this.__getFields(item.data[j]);
+
+                for (let f in fields) {
+                    let key = fields[f].key;
+                    let value = fields[f].value;
+                    let properties = Arrays.getValueByKey(scatters, "dataKey", key);
+                    properties = properties === undefined ? {} : properties;
+                    tooltip += (properties.name || key) + " : " + child[key] + " " + (properties.unit || "") + "\n";
                 }
-                if (item.shape === "rect")
-                    itemArr.push(
-                        <rect x={cx}
-                              y={cy}
-                              height="10"
-                              width="10"
-                              data={tooltip}
-                              className="rb-scatter"
-                              fill={fill}/>);
-                else {
-                    itemArr.push(
-                        <circle cx={cx}
-                                cy={cy}
-                                r="8"
-                                data={tooltip}
-                                className="rb-scatter"
-                                fill={fill}/>);
-                }
+
+                itemArr.push(
+                    <circle
+                        key={i+" "+j}
+                        cx={cx}
+                        cy={cy}
+                        r="0"
+                        fill={fill}>
+                        <animate
+                            attributeName="r"
+                            to={8}
+                            dur={(1 / (data.length - 1)) + "s"}
+                            begin={ (i / (data.length - 1)) + "s"}
+                            fill="freeze"/>
+                    </circle>);
 
             }
         }
@@ -100,7 +97,7 @@ export default class ScatterChart extends ShallowComponent {
             axisArr.push(
                 <div key={i}
                      id={parseInt((max.y/4)*(4-i))}
-                     className="rb-y-axis"
+                     className="rb-scatter-y-axis"
                      style={{height:(this.props.height/4)}}>
                 </div>);
         }
@@ -115,7 +112,7 @@ export default class ScatterChart extends ShallowComponent {
             axisArr.push(
                 <div key={i}
                      id={parseInt((max.x/5)*(i+1))}
-                     className="rb-x-axis"
+                     className="rb-scatter-x-axis"
                      style={{width : (this.props.width-1)/5}}>
                 </div>);
         }
@@ -130,14 +127,12 @@ export default class ScatterChart extends ShallowComponent {
         for (let i in data) {
             let item = data[i];
             for (let j in item.data) {
-                let child = item.data[j];
-                for (let key in child) {
-                    if (child.hasOwnProperty(key)) {
-                        if (key === "x" && child[key] > maxXAxis)
-                            maxXAxis = child[key];
-                        if (key === "y" && child[key] > maxYAxis)
-                            maxYAxis = child[key];
-                    }
+                let fields = this.__getFields(item.data[j]);
+                for (let f in fields) {
+                    if (fields[f].key === "x" && fields[f].value > maxXAxis)
+                        maxXAxis = fields[f].value;
+                    if (fields[f].key === "y" && fields[f].value > maxYAxis)
+                        maxYAxis = fields[f].value;
                 }
             }
         }
@@ -152,13 +147,29 @@ export default class ScatterChart extends ShallowComponent {
         return max;
     }
 
-    __scatterHeight(value) {
+    __pointY(value) {
         let max = this.__maxAxis();
         return this.props.height - ((this.props.height * ((value * 100) / max.y)) / 100);
     }
 
-    __scatterWidth(value) {
+    __pointX(value) {
         let max = this.__maxAxis();
         return ((this.props.width * ((value * 100) / max.x)) / 100);
+    }
+
+    __getFields(data) {
+        let arr = [];
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                if (key === "name" || key === "fill" || key === "unit") {
+                    continue;
+                }
+                arr.push({
+                    value: data[key],
+                    key: key
+                });
+            }
+        }
+        return arr;
     }
 }

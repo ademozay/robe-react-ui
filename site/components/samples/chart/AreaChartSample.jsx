@@ -13,7 +13,7 @@ let data = [
 
 ];
 let areas = [
-    {dataKey: "uv", name: "u-v", fill: "red"},
+    {dataKey: "uv", name: "u-v", fill: "red",unit:"br"},
     {dataKey: "pv", name: "p-v", fill: "blue"},
     {dataKey: "amt", name: "a-m-t", fill: "green"}
 ];

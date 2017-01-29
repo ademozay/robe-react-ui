@@ -4,80 +4,126 @@ import PieChart from "robe-react-ui/lib/charts/PieChart";
 
 let data = [
     {
-        value: 4000,
-        label: "Robe",
+        value: 5000,
+        label: "0",
         unit: "ms",
-        fill: "#8884d8",
-        detail: [
+        fill: "rgb(71, 161, 157)",
+        children: [
             {
-                value: 600,
-                label: "Robe",
+                value: 4000,
+                label: "01",
                 unit: "ms",
-                fill: "#82ca9d"
+                fill: "#8884d8",
+                children: [
+                    {
+                        value: 2000,
+                        label: "011",
+                        unit: "ms",
+                        fill: "#aba8e3",
+                        children: [
+                            {
+                                value: 2000,
+                                label: "0111",
+                                unit: "ms",
+                                fill: "#aba8e3"
+                            },
+                            {
+                                value: 2000,
+                                label: "0112",
+                                unit: "ms",
+                                fill: "#dbdaf3",
+                                children: [
+                                    {
+                                        value: 2000,
+                                        label: "01121",
+                                        unit: "ms",
+                                        fill: "#aba8e3"
+                                    },
+                                    {
+                                        value: 2000,
+                                        label: "01122",
+                                        unit: "ms",
+                                        fill: "#dbdaf3"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        value: 2000,
+                        label: "012",
+                        unit: "ms",
+                        fill: "#dbdaf3",
+                        children: [
+                            {
+                                value: 2000,
+                                label: "0121",
+                                unit: "ms",
+                                fill: "#aba8e3"
+                            },
+                            {
+                                value: 2000,
+                                label: "0122",
+                                unit: "ms",
+                                fill: "#dbdaf3"
+                            }
+                        ]
+                    }
+                ]
             },
             {
-                value: 1000,
-                label: "UI",
+                value: 1500,
+                label: "02",
                 unit: "ms",
-                fill: "#d0ed57"
-            },
-            {
-                value: 2400,
-                label: "Module",
-                unit: "ms",
-                fill: "#ffc658"
+                fill: "#4884d8",
+                children: [
+                    {
+                        value: 600,
+                        label: "021",
+                        unit: "ms",
+                        fill: "#7ea8e3"
+                    },
+                    {
+                        value: 800,
+                        label: "022",
+                        unit: "ms",
+                        fill: "#b5cdef"
+                    }
+                ]
             }
         ]
     },
     {
-        value: 2400,
-        label: "React",
+        value: 2000,
+        label: "111",
         unit: "ms",
-        fill: "#83a6ed",
-        detail: [
+        fill: "#aba8e3",
+        children: [
             {
-                value: 600,
-                label: "Components",
+                value: 2000,
+                label: "1111",
                 unit: "ms",
-                fill: "#82ca9d"
+                fill: "#aba8e3"
             },
             {
-                value: 1000,
-                label: "Docs",
+                value: 2000,
+                label: "1112",
                 unit: "ms",
-                fill: "#d0ed57"
-            },
-            {
-                value: 2400,
-                label: "Examples",
-                unit: "ms",
-                fill: "#ffc658"
-            }
-        ]
-    },
-    {
-        value: 2400,
-        label: "Npm",
-        unit: "ms",
-        fill: "#8dd1e1",
-        detail: [
-            {
-                value: 600,
-                label: "Install",
-                unit: "ms",
-                fill: "#82ca9d"
-            },
-            {
-                value: 1000,
-                label: "Test",
-                unit: "ms",
-                fill: "#d0ed57"
-            },
-            {
-                value: 2400,
-                label: "Start",
-                unit: "ms",
-                fill: "#ffc658"
+                fill: "#dbdaf3",
+                children: [
+                    {
+                        value: 2000,
+                        label: "11121",
+                        unit: "ms",
+                        fill: "#aba8e3"
+                    },
+                    {
+                        value: 2000,
+                        label: "11122",
+                        unit: "ms",
+                        fill: "#dbdaf3"
+                    }
+                ]
             }
         ]
     }
@@ -90,7 +136,7 @@ export default class PieChartSample extends ShallowComponent {
         return (
             <div>
                 <div className="form-group">
-                    <PieChart size={400} data={data}/>
+                    <PieChart size={400} data={data} />
                 </div>
             </div>
         );
