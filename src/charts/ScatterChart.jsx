@@ -30,6 +30,7 @@ export default class ScatterChart extends ShallowComponent {
                     <svg className="rb-scatter-chart-svg">
                         {this.renderScatters(this.props.data, this.props.scatters)}
                     </svg>
+                    <div className="tooltip" id="tooltip">Tooltip</div>
                     <div className="rb-scatter-chart-axis">
                         {this.__renderYAxis()}
                     </div>
@@ -66,7 +67,7 @@ export default class ScatterChart extends ShallowComponent {
                     let value = fields[f].value;
                     let properties = Arrays.getValueByKey(scatters, "dataKey", key);
                     properties = properties === undefined ? {} : properties;
-                    tooltip += (properties.name || key) + " : " + child[key] + " " + (properties.unit || "") + "\n";
+                    tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
                 }
 
                 itemArr.push(
@@ -75,7 +76,11 @@ export default class ScatterChart extends ShallowComponent {
                         cx={cx}
                         cy={cy}
                         r="0"
-                        fill={fill}>
+                        fill={fill}
+                        data={tooltip}
+                        onMouseOver={this.__showTooltip}
+                        onMouseOut={this.__hideTooltip}
+                        onMouseMove={this.__moveTooltip}>
                         <animate
                             attributeName="r"
                             to={8}
@@ -171,5 +176,32 @@ export default class ScatterChart extends ShallowComponent {
             }
         }
         return arr;
+    }
+
+    __showTooltip(evt) {
+        if (this.tooltip === undefined) {
+            this.tooltip = document.getElementById("tooltip");
+        }
+        this.tooltip.style.visibility = "visible";
+
+        let tooltipText = evt.target.getAttribute("data");
+        let fill = evt.target.getAttribute("fill");
+
+        this.tooltip.innerHTML = tooltipText;
+        this.tooltip.style.backgroundColor = fill;
+    }
+
+    __hideTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+        this.tooltip.style.visibility = "hidden";
+    }
+
+    __moveTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+
+        this.tooltip.style.left = (evt.clientX + 10) + "px";
+        this.tooltip.style.top = (evt.clientY + 10) + "px";
     }
 }

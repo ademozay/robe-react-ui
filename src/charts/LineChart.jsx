@@ -30,6 +30,7 @@ export default class AreaChart extends ShallowComponent {
                     <svg className="rb-line-chart-svg">
                         {this.renderLines(this.props.data, this.props.lines)}
                     </svg>
+                    <div className="tooltip" id="tooltip">Tooltip</div>
                     <div className="rb-line-chart-axis">
                         {this.__renderYAxis()}
                     </div>
@@ -57,12 +58,9 @@ export default class AreaChart extends ShallowComponent {
             let item = data[i];
             let itemArr = [];
             let nexItem;
-            let tooltipNext;
-            let tooltip = item.name + "\n";
 
             if (data[i + 1]) {
                 nexItem = data[i + 1];
-                tooltipNext = nexItem.name + "\n"
             }
 
             let fields = this.__getFields(item);
@@ -79,8 +77,8 @@ export default class AreaChart extends ShallowComponent {
                 if (nexItem) {
                     nexValue = nexItem[key];
                 }
-                tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
-                tooltipNext += (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
+                let tooltip = item.name + "\n" + (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
+                let tooltipNext = nexItem.name + "\n" + (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
 
                 let pointY = this.__pointY(value);
                 let nextPointY = this.__pointY(nexValue);
@@ -98,7 +96,13 @@ export default class AreaChart extends ShallowComponent {
                         y1={y1}
                         x2={x1}
                         y2={y1}
-                        style={{stroke:(properties.fill || item.fill),strokeWidth:1}}>
+                        data={tooltip+tooltipNext}
+                        onMouseOver={this.__showTooltip}
+                        onMouseOut={this.__hideTooltip}
+                        onMouseMove={this.__moveTooltip}
+                        strokeLinecap="round"
+                        stroke={(properties.fill || item.fill)}
+                        strokeWidth="4">
                         <animate
                             attributeName="x2"
                             to={x2}
@@ -206,5 +210,32 @@ export default class AreaChart extends ShallowComponent {
             }
         }
         return arr;
+    }
+
+    __showTooltip(evt) {
+        if (this.tooltip === undefined) {
+            this.tooltip = document.getElementById("tooltip");
+        }
+        this.tooltip.style.visibility = "visible";
+
+        let tooltipText = evt.target.getAttribute("data");
+        let fill = evt.target.getAttribute("stroke");
+
+        this.tooltip.innerHTML = tooltipText;
+        this.tooltip.style.backgroundColor = fill;
+    }
+
+    __hideTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+        this.tooltip.style.visibility = "hidden";
+    }
+
+    __moveTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+
+        this.tooltip.style.left = (evt.clientX + 10) + "px";
+        this.tooltip.style.top = (evt.clientY + 10) + "px";
     }
 }

@@ -39,6 +39,7 @@ export default class PieChart extends ShallowComponent {
                     <svg className="rb-pie-chart-svg">
                         {this.__renderPies(data, 360, 0, childCountTree, childCountTree - 1)}
                     </svg>
+                    <div className="tooltip" id="tooltip">Tooltip</div>
                 </div>
             </div>
         )
@@ -93,21 +94,22 @@ export default class PieChart extends ShallowComponent {
             let Y = (origin - mRadius) + y;
             let X = mPercentage <= 180 ? origin + x : origin - x;
             let arcSweep = mPercentage <= 180 ? 0 : 1;
-
             let V = origin - mRadius;
-            let point = this.__calculute(
-                {X: origin, Y: V},
-                {X: X, Y: Y},
-                {X: origin, Y: origin}, arcSweep);
+
+            let tooltip = item.label + "  " + value + " " + (item.unit || "") + "\n";
 
             sectors.push(
                 <path
                     key={key+item.label+X}
                     id={key+item.label+X}
-                    className="rb-pie"
                     transform={'rotate(' + mRotation + ', ' + origin + ', ' + origin + ')'}
                     d={'M ' + origin + ' ' + origin + ' V ' + V + ' A ' + mRadius + ' ' + mRadius + ' 1 ' + arcSweep + ' 1 ' + X + '  ' + Y + " z" }
                     fill={item.fill}
+                    data={tooltip}
+                    strokeLinecap="round"
+                    onMouseOver={this.__showTooltip}
+                    onMouseOut={this.__hideTooltip}
+                    onMouseMove={this.__moveTooltip}
                     onClick={this.__onClick.bind(undefined,item)}>
                 </path>);
             mRotation = mRotation + mPercentage;
@@ -135,7 +137,6 @@ export default class PieChart extends ShallowComponent {
         return count + a;
     }
 
-
     __sumValues(data) {
         let max = 0;
         data.map(function (item, key) {
@@ -145,19 +146,31 @@ export default class PieChart extends ShallowComponent {
         return max;
     }
 
-    text(id, text) {
-        var useTag = '<text xlink:href="#' + id + '">' + text + '</text>';
 
-        return <g dangerouslySetInnerHTML={{__html: useTag }}/>;
+    __showTooltip(evt) {
+        if (this.tooltip === undefined) {
+            this.tooltip = document.getElementById("tooltip");
+        }
+        this.tooltip.style.visibility = "visible";
+
+        let tooltipText = evt.target.getAttribute("data");
+        let fill = evt.target.getAttribute("fill");
+
+        this.tooltip.innerHTML = tooltipText;
+        this.tooltip.style.backgroundColor = fill;
     }
 
-    __calculute(pointA, pointB, pointO, angle) {
-        let widthMin = Math.min(pointA.X, pointB.X, pointO.X);
-        let widthMax = Math.max(pointA.X, pointB.X, pointO.X);
-        let heightMin = Math.min(pointA.Y, pointB.Y, pointO.Y);
-        let heightMax = Math.max(pointA.Y, pointB.Y, pointO.Y);
-        let a = (widthMax - widthMin) / 2 + widthMin;
-        let b = (heightMax - heightMin) / 2 + heightMin;
-        return {X: angle === 1 ? pointO.X + (pointO.X - a) : a, Y: angle === 1 ? pointO.Y + (pointO.Y - b) : b}
+    __hideTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+        this.tooltip.style.visibility = "hidden";
+    }
+
+    __moveTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+
+        this.tooltip.style.left = (evt.clientX + 10) + "px";
+        this.tooltip.style.top = (evt.clientY + 10) + "px";
     }
 }

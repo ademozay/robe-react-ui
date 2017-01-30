@@ -62,3 +62,19 @@
     width: 100%;
     display: block;
 }
+
+.rb-scatter-chart .tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    z-index: 2;
+    border-radius: 2px;
+    visibility: hidden;
+    white-space: pre;
+    padding: 4px;
+    color: white;
+    border: 2px solid #ffffff;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

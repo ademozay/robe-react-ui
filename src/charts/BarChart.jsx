@@ -19,6 +19,8 @@ export default class BarChart extends ShallowComponent {
         bars: []
     };
 
+    tooltip;
+
     constructor(props) {
         super(props)
     }
@@ -31,6 +33,7 @@ export default class BarChart extends ShallowComponent {
                     <svg className="rb-bar-chart-svg">
                         {this.renderBars(this.props.data, this.props.bars)}
                     </svg>
+                    <div className="tooltip" id="tooltip">Tooltip</div>
                     <div className="rb-bar-chart-axis">
                         {this.__renderYAxis()}
                     </div>
@@ -57,7 +60,6 @@ export default class BarChart extends ShallowComponent {
         for (let i in data) {
             let item = data[i];
             let itemArr = [];
-            let tooltip = item.name + "\n";
 
             let barWidth = this.__barWidth(item);
             let fields = this.__getFields(item);
@@ -71,7 +73,7 @@ export default class BarChart extends ShallowComponent {
                 let properties = Arrays.getValueByKey(bars, "dataKey", key);
                 properties = properties === undefined ? {} : properties;
 
-                tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
+                let tooltip = item.name + "\n" + (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
                 let fill = properties.fill || item.fill;
 
                 let barHeight = this.__barHeight(value);
@@ -83,7 +85,12 @@ export default class BarChart extends ShallowComponent {
                         y={0}
                         width={barWidth}
                         height={barHeight}
-                        fill={fill}/>);
+                        data={tooltip}
+                        onMouseOver={this.__showTooltip}
+                        onMouseOut={this.__hideTooltip}
+                        onMouseMove={this.__moveTooltip}
+                        fill={fill}>
+                    </rect>);
 
                 pointX += barWidth;
             }
@@ -183,4 +190,32 @@ export default class BarChart extends ShallowComponent {
         }
         return arr;
     }
+
+    __showTooltip(evt) {
+        if (this.tooltip === undefined) {
+            this.tooltip = document.getElementById("tooltip");
+        }
+        this.tooltip.style.visibility = "visible";
+
+        let tooltipText = evt.target.getAttribute("data");
+        let fill = evt.target.getAttribute("fill");
+
+        this.tooltip.innerHTML = tooltipText;
+        this.tooltip.style.backgroundColor = fill;
+    }
+
+    __hideTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+        this.tooltip.style.visibility = "hidden";
+    }
+
+    __moveTooltip(evt) {
+        if (this.tooltip === undefined)
+            this.tooltip = document.getElementById("tooltip");
+
+        this.tooltip.style.left = (evt.clientX + 10) + "px";
+        this.tooltip.style.top = (evt.clientY + 10) + "px";
+    }
+
 }

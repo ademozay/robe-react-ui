@@ -34,36 +34,6 @@
     opacity: .6;
 }
 
-.rb-area-chart-svg g:hover:after {
-    content: attr(data-after);
-    position: absolute;
-    background-color: #fff;
-    min-height: 32px;
-    min-width: 100%;
-    z-index: 1000;
-    top: 0%;
-    white-space: pre;
-    padding: 4px;
-    border: 1px solid #dddddd;
-    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.rb-area-chart-svg g:hover:before {
-    content: attr(data-before);
-    position: absolute;
-    background-color: #fff;
-    min-height: 32px;
-    min-width: 100%;
-    z-index: 1000;
-    top: 40%;
-    white-space: pre;
-    padding: 4px;
-    border: 1px solid #dddddd;
-    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
 .rb-area-chart-axis {
     position: absolute;
     width: 100%;
@@ -98,4 +68,20 @@
 .rb-area-x-axis {
     height: 100%;
     border-right: 1px solid #dddddd;
+}
+
+.rb-area-chart .tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    z-index: 2;
+    border-radius: 2px;
+    visibility: hidden;
+    white-space: pre;
+    padding: 4px;
+    color: white;
+    border: 2px solid #ffffff;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
