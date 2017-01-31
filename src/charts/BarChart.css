@@ -30,7 +30,11 @@
 .rb-bar-chart-svg g > * {
     opacity: .7;
     transition: all .5s;
+
     -webkit-animation: bar-animation 1s ease;
+    -moz-animation: bar-animation 1s ease;
+    -o-animation: bar-animation 1s ease;
+    -ms-animation: bar-animation 1s ease;
     animation: bar-animation 1s ease;
 }
 

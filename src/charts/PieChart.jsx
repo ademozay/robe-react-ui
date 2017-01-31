@@ -206,7 +206,6 @@ export default class PieChart extends ShallowComponent {
     __randColor(index) {
         let colors = ["#009688", "#4CAF50", "#3F51B5", "#FF9800", "#F44336", "#9C27B0", "#673AB7", "#FFC107", "#2196F3", "#FF5722", "#00796B"];
         if (index !== undefined) {
-
             return colors[parseInt(Math.abs(index)) % (colors.length)];
         }
         return colors[Math.floor(Math.random() * (colors.length - 1))];
