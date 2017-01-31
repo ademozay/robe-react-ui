@@ -19,6 +19,8 @@ export default class ScatterChart extends ShallowComponent {
         scatters: []
     };
 
+    legends = [];
+
     constructor(props) {
         super(props)
     }
@@ -30,7 +32,7 @@ export default class ScatterChart extends ShallowComponent {
                     <svg className="rb-scatter-chart-svg">
                         {this.renderScatters(this.props.data, this.props.scatters)}
                     </svg>
-                    <div className="tooltip" id="tooltip">Tooltip</div>
+                    <div className="tooltip" id="tooltip"></div>
                     <div className="rb-scatter-chart-axis">
                         {this.__renderYAxis()}
                     </div>
@@ -38,13 +40,7 @@ export default class ScatterChart extends ShallowComponent {
                         {this.__renderXAxis()}
                     </div>
                 </div>
-
-                <br/>
-                <Legend
-                    width={this.props.width}
-                    data={this.props.data}
-                    chart="scatter"
-                    legends={this.props.scatters}/>
+                <Legend data={this.legends} width={this.props.width}/>
             </div>
         )
     }
@@ -54,22 +50,22 @@ export default class ScatterChart extends ShallowComponent {
         for (let i in data) {
             let item = data[i];
             for (let j in item.data) {
-                let child = item.data[j];
-                let cx = this.__pointX(child.x);
-                let cy = this.__pointY(child.y);
-                let fill = item.fill;
-                let tooltip = item.name + "\n";
-
-                let fields = this.__getFields(item.data[j]);
+                let child = item.data[j],
+                    cx = this.__pointX(child.x),
+                    cy = this.__pointY(child.y),
+                    fill = item.fill || this.__randColor(i),
+                    tooltip = item.name + "\n",
+                    fields = this.__getFields(item.data[j]);
 
                 for (let f in fields) {
-                    let key = fields[f].key;
-                    let value = fields[f].value;
-                    let properties = Arrays.getValueByKey(scatters, "dataKey", key);
+                    let key = fields[f].key,
+                        value = fields[f].value,
+                        properties = Arrays.getValueByKey(scatters, "dataKey", key);
+
                     properties = properties === undefined ? {} : properties;
                     tooltip += (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
                 }
-
+                this.legends[i] = {fill: fill, label: item.name};
                 itemArr.push(
                     <circle
                         key={i+" "+j}
@@ -97,28 +93,29 @@ export default class ScatterChart extends ShallowComponent {
 
     __renderYAxis() {
         let max = this.__maxAxis();
+        let height = this.props.height / 4;
         let axisArr = [];
         for (let i = 0; i < 4; i++) {
             axisArr.push(
                 <div key={i}
                      id={parseInt((max.y/4)*(4-i))}
                      className="rb-scatter-y-axis"
-                     style={{height:(this.props.height/4)}}>
+                     style={{height:height}}>
                 </div>);
         }
         return axisArr;
     }
 
     __renderXAxis() {
-        let data = this.props.data;
         let max = this.__maxAxis();
+        let width = (this.props.width - 1) / 5;
         let axisArr = [];
         for (let i = 0; i < 5; i++) {
             axisArr.push(
                 <div key={i}
                      id={parseInt((max.x/5)*(i+1))}
                      className="rb-scatter-x-axis"
-                     style={{width : (this.props.width-1)/5}}>
+                     style={{width :width}}>
                 </div>);
         }
         return axisArr;
@@ -203,5 +200,13 @@ export default class ScatterChart extends ShallowComponent {
 
         this.tooltip.style.left = (evt.clientX + 10) + "px";
         this.tooltip.style.top = (evt.clientY + 10) + "px";
+    }
+
+    __randColor(index) {
+        let colors = ["#F44336", "#FF9800", "#FF5722", "#9C27B0", "#673AB7", "#2196F3", "#FFC107", "#4CAF50", "#00796B", "#009688", "#3F51B5"];
+        if (index !== undefined) {
+            return colors[index % colors.length];
+        }
+        return colors[Math.floor(Math.random() * (colors.length - 1))];
     }
 }

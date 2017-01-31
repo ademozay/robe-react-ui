@@ -1,10 +1,10 @@
 .rb-area-chart {
     border-left: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
-    float: none;
     position: relative;
     height: 100%;
     width: 100%;
+    display: table-cell;
 }
 
 .rb-area-chart-svg {
@@ -31,7 +31,7 @@
 }
 
 .rb-area-chart-svg g > * {
-    opacity: .6;
+    opacity: .7;
 }
 
 .rb-area-chart-axis {

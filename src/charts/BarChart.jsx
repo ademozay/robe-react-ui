@@ -19,7 +19,7 @@ export default class BarChart extends ShallowComponent {
         bars: []
     };
 
-    tooltip;
+    legends = [];
 
     constructor(props) {
         super(props)
@@ -33,7 +33,7 @@ export default class BarChart extends ShallowComponent {
                     <svg className="rb-bar-chart-svg">
                         {this.renderBars(this.props.data, this.props.bars)}
                     </svg>
-                    <div className="tooltip" id="tooltip">Tooltip</div>
+                    <div className="tooltip" id="tooltip"></div>
                     <div className="rb-bar-chart-axis">
                         {this.__renderYAxis()}
                     </div>
@@ -41,13 +41,10 @@ export default class BarChart extends ShallowComponent {
                         {this.__renderXAxis()}
                     </div>
                 </div>
-                <div className="rb-bar-chart-axis">
+                <div className="rb-bar-chart-axis-layout">
                     {this.__renderXAxisLayout()}
                 </div>
-                <Legend
-                    width={this.props.width}
-                    data={this.props.data}
-                    legends={this.props.bars}/>
+                <Legend data={this.legends} width={this.props.width}/>
             </div>
         )
     }
@@ -67,16 +64,17 @@ export default class BarChart extends ShallowComponent {
             sumXAxisWidth += xAxisWidth;
 
             for (let j in fields) {
-                let key = fields[j].key;
-                let value = fields[j].value;
+                let key = fields[j].key,
+                    value = fields[j].value;
 
                 let properties = Arrays.getValueByKey(bars, "dataKey", key);
                 properties = properties === undefined ? {} : properties;
 
                 let tooltip = item.name + "\n" + (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
-                let fill = properties.fill || item.fill;
+                let fill = properties.fill || this.__randColor(j);
 
                 let barHeight = this.__barHeight(value);
+                this.legends[properties.name || key] = {fill: fill, label: properties.name || key};
 
                 itemArr.push(
                     <rect
@@ -118,9 +116,9 @@ export default class BarChart extends ShallowComponent {
     }
 
     __renderXAxis() {
-        let data = this.props.data;
-        let maxYAxis = this.__xAxisWidth();
-        let axisArr = [];
+        let data = this.props.data,
+            maxYAxis = this.__xAxisWidth(),
+            axisArr = [];
         for (let i = 0; i < data.length; i++) {
             axisArr.push(
                 <div key={i}
@@ -132,8 +130,8 @@ export default class BarChart extends ShallowComponent {
     }
 
     __renderXAxisLayout() {
-        let data = this.props.data;
-        let axisArr = [];
+        let data = this.props.data,
+            axisArr = [];
         for (let i in data) {
             let item = data[i];
             axisArr.push(
@@ -146,8 +144,8 @@ export default class BarChart extends ShallowComponent {
     }
 
     __maxYAxis() {
-        let data = this.props.data;
-        let maxYAxis = 0;
+        let data = this.props.data,
+            maxYAxis = 0;
         for (let i in data) {
             let fields = this.__getFields(data[i]);
             for (let j in fields) {
@@ -170,8 +168,8 @@ export default class BarChart extends ShallowComponent {
     }
 
     __barWidth(data) {
-        let fields = this.__getFields(data);
-        let minWidth = this.__xAxisWidth() / fields.length;
+        let fields = this.__getFields(data),
+            minWidth = this.__xAxisWidth() / fields.length;
         return minWidth < 30 ? minWidth : 30;
     }
 
@@ -216,6 +214,14 @@ export default class BarChart extends ShallowComponent {
 
         this.tooltip.style.left = (evt.clientX + 10) + "px";
         this.tooltip.style.top = (evt.clientY + 10) + "px";
+    }
+
+    __randColor(index) {
+        let colors = ["#F44336", "#673AB7", "#2196F3", "#FF5722", "#9C27B0", "#FFC107", "#FF9800", "#4CAF50", "#00796B", "#009688", "#3F51B5"];
+        if (index !== undefined) {
+            return colors[index % colors.length];
+        }
+        return colors[Math.floor(Math.random() * (colors.length - 1))];
     }
 
 }

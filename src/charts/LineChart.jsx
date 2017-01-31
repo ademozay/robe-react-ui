@@ -19,6 +19,8 @@ export default class AreaChart extends ShallowComponent {
         lines: []
     };
 
+    legends = [];
+
     constructor(props) {
         super(props)
     }
@@ -41,10 +43,7 @@ export default class AreaChart extends ShallowComponent {
                 <div className="rb-line-chart-axis">
                     {this.__renderXAxisLayout()}
                 </div>
-                <Legend
-                    width={this.props.width}
-                    data={this.props.data}
-                    legends={this.props.lines}/>
+                <Legend data={this.legends} width={this.props.width}/>
             </div>
         )
     }
@@ -67,27 +66,30 @@ export default class AreaChart extends ShallowComponent {
 
             for (let j in fields) {
 
-                let key = fields[j].key;
-                let value = fields[j].value;
+                let key = fields[j].key,
+                    value = fields[j].value,
+                    nexValue = value;
+
+                if (nexItem) {
+                    nexValue = nexItem[key];
+                }
 
                 let properties = Arrays.getValueByKey(lines, "dataKey", key);
                 properties = properties === undefined ? {} : properties;
 
-                let nexValue = value;
-                if (nexItem) {
-                    nexValue = nexItem[key];
-                }
-                let tooltip = item.name + "\n" + (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n";
-                let tooltipNext = nexItem.name + "\n" + (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
+                let tooltip = item.name + "\n" + (properties.name || key) + " : " + value + " " + (properties.unit || "") + "\n",
+                    tooltipNext = nexItem.name + "\n" + (properties.name || key) + " : " + nexValue + " " + (properties.unit || "") + "\n";
 
-                let pointY = this.__pointY(value);
-                let nextPointY = this.__pointY(nexValue);
+                let fill = properties.fill || this.__randColor(j)
 
-                let x1 = sumXAxisWidth;
-                let y1 = pointY;
+                this.legends[properties.name || key] = {fill: fill, label: properties.name || key};
 
-                let x2 = sumXAxisWidth + xAxisWidth;
-                let y2 = nextPointY;
+                let pointY = this.__pointY(value),
+                    nextPointY = this.__pointY(nexValue),
+                    x1 = sumXAxisWidth,
+                    y1 = pointY,
+                    x2 = sumXAxisWidth + xAxisWidth,
+                    y2 = nextPointY;
 
                 itemArr.push(
                     <line
@@ -101,7 +103,7 @@ export default class AreaChart extends ShallowComponent {
                         onMouseOut={this.__hideTooltip}
                         onMouseMove={this.__moveTooltip}
                         strokeLinecap="round"
-                        stroke={(properties.fill || item.fill)}
+                        stroke={fill}
                         strokeWidth="4">
                         <animate
                             attributeName="x2"
@@ -132,13 +134,14 @@ export default class AreaChart extends ShallowComponent {
 
     __renderYAxis() {
         let maxYAxis = this.__maxYAxis();
+        let height = this.props.height / 4;
         let axisArr = [];
         for (let i = 0; i < 4; i++) {
             axisArr.push(
                 <div key={i}
                      id={parseInt((maxYAxis/4)*(4-i))}
                      className="rb-line-y-axis"
-                     style={{height:(this.props.height/4)}}>
+                     style={{height:height}}>
                 </div>);
         }
         return axisArr;
@@ -146,13 +149,13 @@ export default class AreaChart extends ShallowComponent {
 
     __renderXAxis() {
         let data = this.props.data;
-        let maxYAxis = this.__xAxisWidth();
+        let width = this.__xAxisWidth();
         let axisArr = [];
         for (let i = 0; i < data.length - 1; i++) {
             axisArr.push(
                 <div key={i}
                      className="rb-line-x-axis"
-                     style={{width : maxYAxis}}>
+                     style={{width : width}}>
                 </div>);
         }
         return axisArr;
@@ -160,12 +163,13 @@ export default class AreaChart extends ShallowComponent {
 
     __renderXAxisLayout() {
         let data = this.props.data;
+        let width = this.__xAxisWidth();
         let axisArr = [];
         for (let i in data) {
             let item = data[i];
             axisArr.push(
                 <div key={i}
-                     style={{width:this.__xAxisWidth()}}>
+                     style={{width:width}}>
                     {item.name}
                 </div>)
         }
@@ -238,4 +242,13 @@ export default class AreaChart extends ShallowComponent {
         this.tooltip.style.left = (evt.clientX + 10) + "px";
         this.tooltip.style.top = (evt.clientY + 10) + "px";
     }
+
+    __randColor(index) {
+        let colors = ["#F44336", "#673AB7", "#2196F3", "#FF5722", "#9C27B0", "#FFC107", "#FF9800", "#4CAF50", "#00796B", "#009688", "#3F51B5"];
+        if (index !== undefined) {
+            return colors[index % colors.length];
+        }
+        return colors[Math.floor(Math.random() * (colors.length - 1))];
+    }
+
 }

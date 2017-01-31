@@ -26,8 +26,8 @@ const data02 = [
     {x: 210, y: 220, z: 230}];
 
 const data = [
-    {name: "A", data: data01, fill: "red", shape: "rect"},
-    {name: "B", data: data02, fill: "blue", shape: "circle"}
+    {name: "A", data: data01, shape: "rect"},
+    {name: "B", data: data02, shape: "circle"}
 ];
 
 let scatters = [
@@ -43,7 +43,7 @@ export default class ScatterChartSample extends ShallowComponent {
         return (
             <div>
                 <div className="form-group">
-                    <ScatterChart data={data} width={500} height={300} scatters={scatters}/>
+                    <ScatterChart data={data} width={400} height={250} scatters={scatters}/>
                 </div>
             </div>
         );
